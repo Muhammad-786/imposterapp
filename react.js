@@ -839,6 +839,16 @@ export default function App() {
     }
   };
 
+  const quitGame = () => {
+    if (window.confirm('Quit the current game and return to setup?')) {
+      setGameState('setup');
+      setCurrentPlayerIdx(0);
+      setIsRevealed(false);
+      setHasPeeked(false);
+      stopPeekTimer();
+    }
+  };
+
   const addPlayer = () => {
     if (players.length < (settings.maxPlayers || 25)) {
       setPlayers([...players, `Player ${players.length + 1}`]);
@@ -1265,6 +1275,10 @@ export default function App() {
               ))}
             </div>
 
+            <button onClick={quitGame} className="text-gray-600 hover:text-red-400 text-xs font-semibold transition-colors pt-2">
+              ✕ Quit Game
+            </button>
+
           </div>
         )}
 
@@ -1292,12 +1306,15 @@ export default function App() {
               </div>
             </div>
 
-            <div className="pt-4">
+            <div className="pt-4 space-y-3">
               <button 
                 onClick={() => setGameState('reveal')}
                 className="w-full bg-red-600 hover:bg-red-500 text-white font-bold text-lg py-5 rounded-2xl shadow-lg shadow-red-900/50 transform transition active:scale-95"
               >
                 Ready to Vote
+              </button>
+              <button onClick={quitGame} className="w-full text-gray-600 hover:text-red-400 text-xs font-semibold transition-colors py-2">
+                ✕ Quit Game
               </button>
             </div>
           </div>
@@ -1310,9 +1327,14 @@ export default function App() {
               <h2 className="text-3xl font-black text-white">Discussion Time</h2>
               <p className="text-gray-400">Take turns saying one word or clue related to the secret word. Vote when ready.</p>
             </div>
-            <button onClick={() => setGameState('reveal')} className="w-full bg-red-600 hover:bg-red-500 text-white font-bold text-lg py-5 rounded-2xl shadow-lg shadow-red-900/50 transform transition active:scale-95">
-              Ready to Vote
-            </button>
+            <div className="space-y-3">
+              <button onClick={() => setGameState('reveal')} className="w-full bg-red-600 hover:bg-red-500 text-white font-bold text-lg py-5 rounded-2xl shadow-lg shadow-red-900/50 transform transition active:scale-95">
+                Ready to Vote
+              </button>
+              <button onClick={quitGame} className="w-full text-gray-600 hover:text-red-400 text-xs font-semibold transition-colors py-2">
+                ✕ Quit Game
+              </button>
+            </div>
           </div>
         )}
 
@@ -1334,6 +1356,10 @@ export default function App() {
                 >
                   <Eye size={48} className="text-gray-400 mb-4" />
                   <span className="text-xl font-bold text-gray-300">Reveal Impostor</span>
+                </button>
+
+                <button onClick={quitGame} className="text-gray-600 hover:text-red-400 text-xs font-semibold transition-colors pt-2 block w-full">
+                  ✕ Quit Game
                 </button>
               </div>
             ) : (

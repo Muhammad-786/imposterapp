@@ -1,6 +1,6 @@
 {
   "appId": "com.islamic.imposter",
-  "appName": "Islamic Imposter",
+  "appName": "Impostor: Deen Edition",
   "webDir": "dist",
   "server": {
     "androidScheme": "https"

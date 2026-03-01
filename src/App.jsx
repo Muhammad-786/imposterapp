@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Users, Settings, Eye, EyeOff, Play, RotateCcw, ShieldQuestion, HelpCircle, X, Edit2, Plus, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { Users, Settings, Eye, EyeOff, Play, RotateCcw, HelpCircle, X, Edit2, Plus, Trash2, ChevronDown, ChevronUp, Clock, Vibrate, Moon, RefreshCw, Info } from 'lucide-react';
 
 // --- GAME DATA ---
 const wordCategories = {
@@ -436,7 +436,303 @@ const wordCategories = {
 };
 
 // --- EMOJI OPTIONS ---
-const EMOJI_OPTIONS = ["🎯","🌟","🔥","💡","🎮","📝","🏆","🎲","🌈","⚡","🎪","🧠","💎","🚀","🌙","☀️","🎭","🎨","🎵","🌺"];
+const EMOJI_OPTIONS = ["🎯","🌟","🔥","💡","🎮","📝","🏆","🎲","🌈","⚡","🎪","🧠","💎","🚀","🌙","☀️","🎭","🎨","🎵","🌺","🕌","☪️","📿","🤲","🌿","🛡️","📖","🌸"];
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MODAL: Custom Category  (defined OUTSIDE App to prevent keyboard-closing bug)
+// ─────────────────────────────────────────────────────────────────────────────
+function CustomCategoryModal({
+  onClose, editingCustomKey,
+  customName, setCustomName,
+  customIcon, setCustomIcon,
+  customWords, setCustomWords,
+  customWordInput, setCustomWordInput,
+  bulkInput, setBulkInput,
+  showBulk, setShowBulk,
+  showEmojiPicker, setShowEmojiPicker,
+  addCustomWord, applyBulkInput, removeCustomWord, saveCustomCategory,
+  wordInputRef
+}) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/80" onClick={onClose}>
+      <div
+        className="bg-[#1a1a1a] w-full max-w-md rounded-t-3xl sm:rounded-3xl border border-gray-700 shadow-2xl max-h-[92vh] flex flex-col"
+        onClick={e => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between p-5 border-b border-gray-800 shrink-0">
+          <h2 className="text-xl font-black text-white">{editingCustomKey ? 'Edit Category' : 'New Custom Category'}</h2>
+          <button onClick={onClose} className="text-gray-400 hover:text-white p-1"><X size={22} /></button>
+        </div>
+
+        <div className="overflow-y-auto flex-1 p-5 space-y-5" style={{ scrollbarWidth: 'thin', scrollbarColor: '#10b981 transparent' }}>
+
+          {/* Icon + Name */}
+          <div className="flex gap-3">
+            <div className="relative">
+              <button
+                onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                className="w-14 h-14 text-2xl bg-gray-800 border border-gray-700 rounded-xl flex items-center justify-center hover:border-emerald-500 transition-colors"
+              >{customIcon}</button>
+              {showEmojiPicker && (
+                <div className="absolute top-16 left-0 z-10 bg-[#222] border border-gray-700 rounded-2xl p-3 shadow-2xl grid grid-cols-7 gap-1.5">
+                  {EMOJI_OPTIONS.map(e => (
+                    <button key={e} onClick={() => { setCustomIcon(e); setShowEmojiPicker(false); }}
+                      className="text-xl w-9 h-9 rounded-lg hover:bg-gray-700 flex items-center justify-center">{e}</button>
+                  ))}
+                </div>
+              )}
+            </div>
+            <input
+              value={customName}
+              onChange={e => setCustomName(e.target.value)}
+              placeholder="Category name..."
+              className="flex-1 bg-gray-800 border border-gray-700 focus:border-emerald-500 rounded-xl px-4 text-white placeholder-gray-500 focus:outline-none text-sm font-semibold"
+            />
+          </div>
+
+          {/* Single word input */}
+          <div>
+            <p className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-2">Add Words</p>
+            <div className="flex gap-2">
+              <input
+                ref={wordInputRef}
+                value={customWordInput}
+                onChange={e => setCustomWordInput(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addCustomWord(); } }}
+                placeholder="Type a word and press Enter..."
+                className="flex-1 bg-gray-800 border border-gray-700 focus:border-emerald-500 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none text-sm"
+              />
+              <button onClick={addCustomWord} className="bg-emerald-600 hover:bg-emerald-500 text-white px-4 rounded-xl font-bold transition-colors"><Plus size={18} /></button>
+            </div>
+          </div>
+
+          {/* Bulk paste */}
+          <div>
+            <button
+              onClick={() => setShowBulk(!showBulk)}
+              className="flex items-center gap-2 text-emerald-400 text-sm font-semibold hover:text-emerald-300 transition-colors"
+            >
+              {showBulk ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+              Bulk paste words
+            </button>
+            {showBulk && (
+              <div className="mt-3 space-y-2">
+                <textarea
+                  value={bulkInput}
+                  onChange={e => setBulkInput(e.target.value)}
+                  placeholder={`Paste words separated by commas, semicolons, or new lines.\n\nApple, Banana\nMango; Grape`}
+                  rows={6}
+                  className="w-full bg-gray-800 border border-gray-700 focus:border-emerald-500 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none text-sm resize-none"
+                />
+                <button
+                  onClick={applyBulkInput}
+                  disabled={!bulkInput.trim()}
+                  className="w-full py-3 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-colors text-sm"
+                >Add All Words</button>
+              </div>
+            )}
+          </div>
+
+          {/* Word chips */}
+          {customWords.length > 0 && (
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-gray-400 text-xs font-bold uppercase tracking-widest">Words ({customWords.length})</p>
+                {customWords.length < 3 && <p className="text-amber-400 text-xs">Need at least 3</p>}
+              </div>
+              <div className="flex flex-wrap gap-2 max-h-48 overflow-y-auto" style={{ scrollbarWidth: 'thin', scrollbarColor: '#10b981 transparent' }}>
+                {customWords.map((w, i) => (
+                  <div key={i} className="flex items-center gap-1 bg-gray-800 border border-gray-700 rounded-lg px-3 py-1.5 text-sm text-gray-200">
+                    <span className="max-w-[160px] truncate">{w}</span>
+                    <button onClick={() => removeCustomWord(i)} className="text-gray-500 hover:text-red-400 ml-1"><X size={12} /></button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="p-5 border-t border-gray-800 shrink-0">
+          <button
+            onClick={saveCustomCategory}
+            disabled={!customName.trim() || customWords.length < 3}
+            className="w-full py-4 bg-[#ccff00] hover:bg-[#b8e600] disabled:opacity-30 disabled:cursor-not-allowed text-black font-black rounded-2xl transition-colors uppercase tracking-wide"
+          >Save Category</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MODAL: How to Play
+// ─────────────────────────────────────────────────────────────────────────────
+function HowToPlayModal({ onClose }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80" onClick={onClose}>
+      <div className="bg-[#222] w-full max-w-md rounded-2xl overflow-hidden shadow-2xl relative" onClick={e => e.stopPropagation()}>
+        <div className="p-6">
+          <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-white"><X size={24} /></button>
+          <h2 className="text-2xl font-bold text-white mb-6">How to Play</h2>
+          <div className="space-y-4 text-gray-200">
+            {[
+              'Gather 3–25 friends and pass the phone around.',
+              'Each player presses and holds the card to see the secret word — except the Impostor, who sees "IMPOSTOR".',
+              'One by one, players say one word or clue related to the secret word.',
+              'The impostor must fake it and blend in without knowing the true word.',
+              'Keep giving clues until someone thinks they\'ve figured it out.',
+              'Vote for who you think the impostor is — then tap to reveal the truth!'
+            ].map((text, i) => (
+              <div key={i} className="flex gap-4">
+                <span className="text-emerald-500 font-bold text-xl shrink-0">{i + 1}</span>
+                <p>{text}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MODAL: Settings
+// ─────────────────────────────────────────────────────────────────────────────
+function SettingsModal({ onClose, settings, onToggle, onTimerChange, onResetCustom }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/80" onClick={onClose}>
+      <div
+        className="bg-[#1a1a1a] w-full max-w-md rounded-t-3xl sm:rounded-3xl border border-gray-700 shadow-2xl max-h-[90vh] flex flex-col"
+        onClick={e => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between p-5 border-b border-gray-800 shrink-0">
+          <h2 className="text-xl font-black text-white flex items-center gap-2"><Settings size={20} className="text-emerald-400" /> Settings</h2>
+          <button onClick={onClose} className="text-gray-400 hover:text-white p-1"><X size={22} /></button>
+        </div>
+
+        <div className="overflow-y-auto flex-1 p-5 space-y-3" style={{ scrollbarWidth: 'thin', scrollbarColor: '#10b981 transparent' }}>
+
+          {/* Section: Gameplay */}
+          <p className="text-gray-500 text-xs font-bold uppercase tracking-widest pb-1">Gameplay</p>
+
+          {/* Peek Timer */}
+          <div className="bg-gray-800/60 border border-gray-700 rounded-2xl p-4">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 bg-emerald-500/10 rounded-xl flex items-center justify-center">
+                  <Clock size={18} className="text-emerald-400" />
+                </div>
+                <div>
+                  <p className="text-white font-semibold text-sm">Peek Timer</p>
+                  <p className="text-gray-500 text-xs">Auto-hide card after N seconds</p>
+                </div>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" className="sr-only peer" checked={settings.timerEnabled} onChange={() => onToggle('timerEnabled')} />
+                <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+              </label>
+            </div>
+            {settings.timerEnabled && (
+              <div className="flex gap-2 mt-1">
+                {[5, 10, 15, 20, 30].map(s => (
+                  <button
+                    key={s}
+                    onClick={() => onTimerChange(s)}
+                    className={`flex-1 py-2 rounded-xl text-sm font-bold transition-colors ${
+                      settings.timerSeconds === s
+                        ? 'bg-emerald-500 text-white'
+                        : 'bg-gray-700 text-gray-400 hover:bg-gray-600'
+                    }`}
+                  >{s}s</button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Show who starts */}
+          <div className="bg-gray-800/60 border border-gray-700 rounded-2xl p-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 bg-purple-500/10 rounded-xl flex items-center justify-center">
+                <Users size={18} className="text-purple-400" />
+              </div>
+              <div>
+                <p className="text-white font-semibold text-sm">Show Starting Player</p>
+                <p className="text-gray-500 text-xs">Display who speaks first</p>
+              </div>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" className="sr-only peer" checked={settings.showStartingPlayer} onChange={() => onToggle('showStartingPlayer')} />
+              <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+            </label>
+          </div>
+
+          {/* Impostor sees partners */}
+          <div className="bg-gray-800/60 border border-gray-700 rounded-2xl p-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 bg-red-500/10 rounded-xl flex items-center justify-center">
+                <span className="text-lg">🥷</span>
+              </div>
+              <div>
+                <p className="text-white font-semibold text-sm">Impostors See Partners</p>
+                <p className="text-gray-500 text-xs">When multiple impostors, they know each other</p>
+              </div>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" className="sr-only peer" checked={settings.impostorsKnowEachOther} onChange={() => onToggle('impostorsKnowEachOther')} />
+              <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+            </label>
+          </div>
+
+          {/* Vibration */}
+          <div className="bg-gray-800/60 border border-gray-700 rounded-2xl p-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 bg-yellow-500/10 rounded-xl flex items-center justify-center">
+                <Vibrate size={18} className="text-yellow-400" />
+              </div>
+              <div>
+                <p className="text-white font-semibold text-sm">Vibration</p>
+                <p className="text-gray-500 text-xs">Haptic feedback on reveal</p>
+              </div>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" className="sr-only peer" checked={settings.vibration} onChange={() => onToggle('vibration')} />
+              <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+            </label>
+          </div>
+
+          {/* Section: Data */}
+          <p className="text-gray-500 text-xs font-bold uppercase tracking-widest pb-1 pt-2">Data</p>
+
+          <button
+            onClick={onResetCustom}
+            className="w-full bg-gray-800/60 border border-red-500/30 hover:border-red-500/60 rounded-2xl p-4 flex items-center gap-3 transition-colors group"
+          >
+            <div className="w-9 h-9 bg-red-500/10 rounded-xl flex items-center justify-center">
+              <Trash2 size={18} className="text-red-400" />
+            </div>
+            <div className="text-left">
+              <p className="text-red-400 font-semibold text-sm group-hover:text-red-300">Delete All Custom Categories</p>
+              <p className="text-gray-500 text-xs">Cannot be undone</p>
+            </div>
+          </button>
+
+          {/* About */}
+          <p className="text-gray-500 text-xs font-bold uppercase tracking-widest pb-1 pt-2">About</p>
+          <div className="bg-gray-800/60 border border-gray-700 rounded-2xl p-4 flex items-center gap-3">
+            <div className="w-9 h-9 bg-emerald-500/10 rounded-xl flex items-center justify-center">
+              <Info size={18} className="text-emerald-400" />
+            </div>
+            <div>
+              <p className="text-white font-semibold text-sm">Impostor: Deen Edition</p>
+              <p className="text-gray-500 text-xs">Version 1.0.0 · Made with ❤️ for the Ummah</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function App() {
   // --- STATE ---
@@ -447,6 +743,27 @@ export default function App() {
   const [imposterCount, setImposterCount] = useState(1);
   const [selectedCategory, setSelectedCategory] = useState('kidsAnimals');
   const [showHowToPlay, setShowHowToPlay] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+
+  // Settings State
+  const [settings, setSettings] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('gameSettings') || 'null'); }
+    catch { return null; }
+  } || {
+    timerEnabled: false,
+    timerSeconds: 10,
+    showStartingPlayer: true,
+    impostorsKnowEachOther: true,
+    vibration: true,
+  });
+
+  const updateSettings = (updated) => {
+    setSettings(updated);
+    localStorage.setItem('gameSettings', JSON.stringify(updated));
+  };
+
+  const toggleSetting = (key) => updateSettings({ ...settings, [key]: !settings[key] });
+  const setTimerSeconds = (s) => updateSettings({ ...settings, timerSeconds: s });
 
   // Custom Categories State
   const [customCategories, setCustomCategories] = useState(() => {
@@ -635,183 +952,40 @@ export default function App() {
     setIsRevealed(false);
   };
 
-  // --- COMPONENTS ---
-  const CustomCategoryModal = () => (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/80" onClick={() => setShowCustomModal(false)}>
-      <div
-        className="bg-[#1a1a1a] w-full max-w-md rounded-t-3xl sm:rounded-3xl border border-gray-700 shadow-2xl max-h-[92vh] flex flex-col"
-        onClick={e => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b border-gray-800 shrink-0">
-          <h2 className="text-xl font-black text-white">
-            {editingCustomKey ? 'Edit Category' : 'New Custom Category'}
-          </h2>
-          <button onClick={() => setShowCustomModal(false)} className="text-gray-400 hover:text-white p-1">
-            <X size={22} />
-          </button>
-        </div>
+  // --- TIMER LOGIC ---
+  const timerRef = useRef(null);
+  const [timeLeft, setTimeLeft] = useState(null);
 
-        {/* Scrollable body */}
-        <div className="overflow-y-auto flex-1 p-5 space-y-5" style={{ scrollbarWidth: 'thin', scrollbarColor: '#10b981 transparent' }}>
+  const startPeekTimer = () => {
+    if (!settings.timerEnabled) return;
+    setTimeLeft(settings.timerSeconds);
+    clearInterval(timerRef.current);
+    timerRef.current = setInterval(() => {
+      setTimeLeft(prev => {
+        if (prev <= 1) { clearInterval(timerRef.current); return 0; }
+        return prev - 1;
+      });
+    }, 1000);
+  };
 
-          {/* Icon + Name */}
-          <div className="flex gap-3">
-            <div className="relative">
-              <button
-                onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                className="w-14 h-14 text-2xl bg-gray-800 border border-gray-700 rounded-xl flex items-center justify-center hover:border-emerald-500 transition-colors"
-              >{customIcon}</button>
-              {showEmojiPicker && (
-                <div className="absolute top-16 left-0 z-10 bg-[#222] border border-gray-700 rounded-2xl p-3 shadow-2xl grid grid-cols-5 gap-2">
-                  {EMOJI_OPTIONS.map(e => (
-                    <button key={e} onClick={() => { setCustomIcon(e); setShowEmojiPicker(false); }}
-                      className="text-xl w-9 h-9 rounded-lg hover:bg-gray-700 flex items-center justify-center">{e}</button>
-                  ))}
-                </div>
-              )}
-            </div>
-            <input
-              value={customName}
-              onChange={e => setCustomName(e.target.value)}
-              placeholder="Category name..."
-              className="flex-1 bg-gray-800 border border-gray-700 focus:border-emerald-500 rounded-xl px-4 text-white placeholder-gray-500 focus:outline-none text-sm font-semibold"
-            />
-          </div>
-
-          {/* Add single word */}
-          <div>
-            <p className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-2">Add Words</p>
-            <div className="flex gap-2">
-              <input
-                ref={wordInputRef}
-                value={customWordInput}
-                onChange={e => setCustomWordInput(e.target.value)}
-                onKeyDown={e => e.key === 'Enter' && addCustomWord()}
-                placeholder="Type a word and press Enter..."
-                className="flex-1 bg-gray-800 border border-gray-700 focus:border-emerald-500 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none text-sm"
-              />
-              <button
-                onClick={addCustomWord}
-                className="bg-emerald-600 hover:bg-emerald-500 text-white px-4 rounded-xl font-bold transition-colors"
-              ><Plus size={18} /></button>
-            </div>
-          </div>
-
-          {/* Bulk paste toggle */}
-          <div>
-            <button
-              onClick={() => setShowBulk(!showBulk)}
-              className="flex items-center gap-2 text-emerald-400 text-sm font-semibold hover:text-emerald-300 transition-colors"
-            >
-              {showBulk ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-              Bulk paste words
-            </button>
-            {showBulk && (
-              <div className="mt-3 space-y-2">
-                <textarea
-                  value={bulkInput}
-                  onChange={e => setBulkInput(e.target.value)}
-                  placeholder={`Paste multiple words separated by commas, semicolons, or new lines.\n\nExample:\nApple, Banana\nMango; Grape\nOrange`}
-                  rows={6}
-                  className="w-full bg-gray-800 border border-gray-700 focus:border-emerald-500 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none text-sm resize-none"
-                />
-                <button
-                  onClick={applyBulkInput}
-                  disabled={!bulkInput.trim()}
-                  className="w-full py-3 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-colors text-sm"
-                >Add All Words</button>
-              </div>
-            )}
-          </div>
-
-          {/* Words list */}
-          {customWords.length > 0 && (
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-gray-400 text-xs font-bold uppercase tracking-widest">Words ({customWords.length})</p>
-                {customWords.length < 3 && <p className="text-amber-400 text-xs">Need at least 3</p>}
-              </div>
-              <div className="flex flex-wrap gap-2 max-h-48 overflow-y-auto" style={{ scrollbarWidth: 'thin', scrollbarColor: '#10b981 transparent' }}>
-                {customWords.map((w, i) => (
-                  <div key={i} className="flex items-center gap-1 bg-gray-800 border border-gray-700 rounded-lg px-3 py-1.5 text-sm text-gray-200">
-                    <span className="max-w-[160px] truncate">{w}</span>
-                    <button onClick={() => removeCustomWord(i)} className="text-gray-500 hover:text-red-400 ml-1"><X size={12} /></button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Footer */}
-        <div className="p-5 border-t border-gray-800 shrink-0">
-          <button
-            onClick={saveCustomCategory}
-            disabled={!customName.trim() || customWords.length < 3}
-            className="w-full py-4 bg-[#ccff00] hover:bg-[#b8e600] disabled:opacity-30 disabled:cursor-not-allowed text-black font-black rounded-2xl transition-colors uppercase tracking-wide"
-          >Save Category</button>
-        </div>
-      </div>
-    </div>
-  );
-
-  const HowToPlayModal = () => (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80">
-      <div className="bg-[#222] w-full max-w-md rounded-2xl overflow-hidden shadow-2xl relative">
-        <div className="p-6">
-          <button 
-            onClick={() => setShowHowToPlay(false)}
-            className="absolute top-4 right-4 text-gray-400 hover:text-white"
-          >
-            <X size={24} />
-          </button>
-          
-          <h2 className="text-2xl font-bold text-white mb-6">How to Play</h2>
-          
-          <div className="space-y-4 text-gray-200">
-            <div className="flex gap-4">
-              <span className="text-emerald-500 font-bold text-xl">1</span>
-              <p>Gather 3-25 friends and pass the phone around.</p>
-            </div>
-            <div className="flex gap-4">
-              <span className="text-emerald-500 font-bold text-xl">2</span>
-              <p>Each player <strong>presses and holds</strong> the card to see the secret word — except the Imposter, who will see "Imposter".</p>
-            </div>
-            <div className="flex gap-4">
-              <span className="text-emerald-500 font-bold text-xl">3</span>
-              <p>One by one, players say a word related to the secret word (e.g. if the word is "Camel", say "Desert").</p>
-            </div>
-            <div className="flex gap-4">
-              <span className="text-emerald-500 font-bold text-xl">4</span>
-              <p>The imposter must fake it and try to blend in without knowing the true word.</p>
-            </div>
-            <div className="flex gap-4">
-              <span className="text-emerald-500 font-bold text-xl">5</span>
-              <p>Keep giving clues and discussing until someone thinks they've figured it out.</p>
-            </div>
-            <div className="flex gap-4">
-              <span className="text-emerald-500 font-bold text-xl">6</span>
-              <p>Vote for who you think the imposter is — then tap to reveal the truth!</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+  const stopPeekTimer = () => {
+    clearInterval(timerRef.current);
+    setTimeLeft(null);
+  };
 
   return (
     <div className="min-h-screen bg-[#121212] text-white font-sans selection:bg-emerald-500/30">
-      
+
       {/* Header */}
       <header className="p-4 flex items-center justify-between border-b border-gray-800 bg-[#1a1a1a]">
         <button onClick={() => setShowHowToPlay(true)} className="p-2 text-gray-400 hover:text-white transition-colors bg-gray-800 rounded-full">
           <HelpCircle size={20} />
         </button>
-        <h1 className="text-2xl font-black tracking-widest text-center flex-1 uppercase text-gray-100">
-          <span className="text-emerald-500">Islamic</span> Imposter
+        <h1 className="text-lg font-black tracking-wide text-center flex-1 text-gray-100 leading-tight">
+          <span className="text-emerald-400">☪️ Impostor</span>
+          <span className="text-gray-400 font-medium">: Deen Edition</span>
         </h1>
-        <button className="p-2 text-gray-400 hover:text-white transition-colors bg-gray-800 rounded-full">
+        <button onClick={() => setShowSettings(true)} className="p-2 text-gray-400 hover:text-white transition-colors bg-gray-800 rounded-full">
           <Settings size={20} />
         </button>
       </header>
@@ -980,12 +1154,14 @@ export default function App() {
             {/* HIDING CARD */}
             <div 
               onPointerDown={(e) => {
-                e.preventDefault(); // Prevents text selection/magnifier on mobile
+                e.preventDefault();
                 setIsPressing(true);
                 setHasPeeked(true);
+                startPeekTimer();
+                if (settings.vibration && navigator.vibrate) navigator.vibrate(30);
               }}
-              onPointerUp={() => setIsPressing(false)}
-              onPointerLeave={() => setIsPressing(false)}
+              onPointerUp={() => { setIsPressing(false); stopPeekTimer(); }}
+              onPointerLeave={() => { setIsPressing(false); stopPeekTimer(); }}
               onContextMenu={(e) => e.preventDefault()} // Prevents right-click/long-press menu
               style={{ touchAction: 'none', userSelect: 'none', WebkitUserSelect: 'none' }}
               className={`w-full max-w-sm min-h-[300px] border-2 rounded-3xl flex flex-col items-center justify-center p-8 shadow-2xl relative overflow-hidden transition-all duration-150 cursor-pointer ${
@@ -1002,22 +1178,26 @@ export default function App() {
                 </div>
               ) : (
                 <div className="flex flex-col items-center justify-center h-full w-full pointer-events-none animate-in zoom-in-95 duration-100">
+                  {settings.timerEnabled && timeLeft !== null && (
+                    <div className={`absolute top-4 right-4 text-xs font-black px-2 py-1 rounded-lg ${ timeLeft <= 3 ? 'bg-red-500/20 text-red-400' : 'bg-emerald-500/20 text-emerald-400' }`}>
+                      {timeLeft}s
+                    </div>
+                  )}
                   <span className="text-gray-500 text-sm font-semibold uppercase tracking-wider mb-2">Your Secret Word</span>
                   
                   {imposters.includes(currentPlayerIdx) ? (
                     <div className="text-center">
-                      <h3 className="text-4xl font-black text-red-500 tracking-tight mb-1">IMPOSTER</h3>
+                      <h3 className="text-4xl font-black text-red-500 tracking-tight mb-1">IMPOSTOR</h3>
                       <p className="text-red-400/80 text-sm mb-4">You don't know the word. Blend in!</p>
                       
-                      {/* Show fellow imposters if there is more than 1 */}
-                      {imposters.length > 1 && (
+                      {settings.impostorsKnowEachOther && imposters.length > 1 && (
                         <div className="mt-2 p-3 bg-red-500/10 border border-red-500/20 rounded-xl animate-in fade-in zoom-in-50">
                           <p className="text-xs text-red-300 uppercase tracking-wider mb-1">Your Partners:</p>
                           <p className="text-sm font-bold text-red-400">
                             {imposters.filter(idx => idx !== currentPlayerIdx).map(idx => players[idx]).join(', ')}
                           </p>
                         </div>
-                      )}
+                      )}  
                     </div>
                   ) : (
                     <div className="text-center w-full px-2">
@@ -1061,7 +1241,7 @@ export default function App() {
         )}
 
         {/* STATE: DISCUSSION */}
-        {gameState === 'discussion' && (
+        {gameState === 'discussion' && settings.showStartingPlayer && (
           <div className="w-full text-center space-y-10 animate-in slide-in-from-bottom-8 duration-500">
             <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-full p-8 inline-block mb-4 relative">
               <Users size={64} className="text-emerald-500" />
@@ -1095,6 +1275,19 @@ export default function App() {
           </div>
         )}
 
+        {/* STATE: DISCUSSION (no starting player) */}
+        {gameState === 'discussion' && !settings.showStartingPlayer && (
+          <div className="w-full text-center space-y-10 animate-in slide-in-from-bottom-8 duration-500">
+            <div className="space-y-4 bg-[#1a1a1a] p-6 rounded-3xl border border-gray-800 shadow-xl">
+              <h2 className="text-3xl font-black text-white">Discussion Time</h2>
+              <p className="text-gray-400">Take turns saying one word or clue related to the secret word. Vote when ready.</p>
+            </div>
+            <button onClick={() => setGameState('reveal')} className="w-full bg-red-600 hover:bg-red-500 text-white font-bold text-lg py-5 rounded-2xl shadow-lg shadow-red-900/50 transform transition active:scale-95">
+              Ready to Vote
+            </button>
+          </div>
+        )}
+
         {/* STATE: REVEAL */}
         {gameState === 'reveal' && (
           <div className="w-full text-center flex flex-col items-center justify-center min-h-[60vh] animate-in fade-in duration-500">
@@ -1102,20 +1295,23 @@ export default function App() {
             {!isRevealed ? (
               <div className="space-y-8 w-full">
                 <h2 className="text-3xl font-black mb-8">Who was it?</h2>
-                <p className="text-gray-400 mb-8">Discuss and vote on who you think the Imposter is. Once agreed, tap below to reveal the truth.</p>
+                <p className="text-gray-400 mb-8">Agree on who you think the Impostor is, then tap to reveal the truth.</p>
                 
                 <button 
-                  onClick={() => setIsRevealed(true)}
+                  onClick={() => {
+                    setIsRevealed(true);
+                    if (settings.vibration && navigator.vibrate) navigator.vibrate([100, 50, 100]);
+                  }}
                   className="w-64 h-64 rounded-full bg-gray-800 border-4 border-gray-700 flex flex-col items-center justify-center mx-auto shadow-2xl active:scale-95 transition-transform"
                 >
                   <Eye size={48} className="text-gray-400 mb-4" />
-                  <span className="text-xl font-bold text-gray-300">Reveal Imposter</span>
+                  <span className="text-xl font-bold text-gray-300">Reveal Impostor</span>
                 </button>
               </div>
             ) : (
               <div className="w-full space-y-10 animate-in zoom-in-95 duration-500">
                 <div className="space-y-2">
-                  <h3 className="text-gray-400 text-lg uppercase tracking-widest font-semibold">The Imposter was...</h3>
+                  <h3 className="text-gray-400 text-lg uppercase tracking-widest font-semibold">The Impostor was...</h3>
                   <h2 className="text-5xl font-black text-red-500">
                     {imposters.length === 1 
                       ? players[imposters[0]] 
@@ -1143,8 +1339,41 @@ export default function App() {
       </main>
 
       {/* Modals */}
-      {showHowToPlay && <HowToPlayModal />}
-      {showCustomModal && <CustomCategoryModal />}
+      {showHowToPlay && <HowToPlayModal onClose={() => setShowHowToPlay(false)} />}
+
+      {showSettings && (
+        <SettingsModal
+          onClose={() => setShowSettings(false)}
+          settings={settings}
+          onToggle={toggleSetting}
+          onTimerChange={setTimerSeconds}
+          onResetCustom={() => {
+            if (window.confirm('Delete all custom categories?')) {
+              saveCustomCategories({});
+              setSelectedCategory('kidsAnimals');
+            }
+          }}
+        />
+      )}
+
+      {showCustomModal && (
+        <CustomCategoryModal
+          onClose={() => setShowCustomModal(false)}
+          editingCustomKey={editingCustomKey}
+          customName={customName} setCustomName={setCustomName}
+          customIcon={customIcon} setCustomIcon={setCustomIcon}
+          customWords={customWords} setCustomWords={setCustomWords}
+          customWordInput={customWordInput} setCustomWordInput={setCustomWordInput}
+          bulkInput={bulkInput} setBulkInput={setBulkInput}
+          showBulk={showBulk} setShowBulk={setShowBulk}
+          showEmojiPicker={showEmojiPicker} setShowEmojiPicker={setShowEmojiPicker}
+          addCustomWord={addCustomWord}
+          applyBulkInput={applyBulkInput}
+          removeCustomWord={removeCustomWord}
+          saveCustomCategory={saveCustomCategory}
+          wordInputRef={wordInputRef}
+        />
+      )}
 
     </div>
   );

@@ -3,104 +3,434 @@ import { Users, Settings, Eye, EyeOff, Play, RotateCcw, ShieldQuestion, HelpCirc
 
 // --- GAME DATA ---
 const wordCategories = {
+  // ── EASY CATEGORIES ─────────────────────────────────────────────────────────
   kidsAnimals: {
     icon: "🐘",
     name: "Easy: Animals in the Quran",
-    words: ["Camel", "Elephant", "Whale", "Spider", "Ant", "Bee", "Snake", "Cow", "Bird", "Fish"]
+    words: [
+      "Camel", "Elephant", "Whale", "Spider", "Ant", "Bee", "Snake", "Cow", "Bird", "Fish",
+      "Donkey", "Horse", "Lion", "Dog", "Hoopoe", "Wolf", "Sheep", "Goat", "Ram", "Goose",
+      "Locust", "Frog", "Louse", "Fly", "Mosquito", "Monkey", "Pig", "Swallow", "Crow", "Dove",
+      "Cat", "Ox", "Deer", "Fox", "Bear", "Eagle", "Peacock", "Rabbit", "Turtle", "Crab"
+    ]
   },
   kidsFood: {
     icon: "🍯",
     name: "Easy: Food & Drink",
-    words: ["Dates", "Honey", "Milk", "Zamzam Water", "Olives", "Figs", "Pomegranate", "Grapes"]
+    words: [
+      "Dates", "Honey", "Milk", "Zamzam Water", "Olives", "Figs", "Pomegranate", "Grapes",
+      "Bread", "Meat", "Lentils", "Garlic", "Onion", "Cucumber", "Watermelon", "Barley",
+      "Wheat", "Butter", "Cheese", "Vinegar", "Olive Oil", "Ginger", "Pears", "Apples",
+      "Raisins", "Almonds", "Walnuts", "Chickpeas", "Fish", "Lamb", "Goat Meat", "Camel Milk",
+      "Sweet Melon", "Lentil Soup", "Flatbread", "Quinces", "Pistachios", "Saffron"
+    ]
   },
   kidsDeeds: {
     icon: "❤️",
     name: "Easy: Good Deeds",
-    words: ["Smiling", "Sharing", "Saying Salam", "Helping Parents", "Making Dua", "Giving Charity", "Telling the Truth", "Reading Quran"]
+    words: [
+      "Smiling", "Sharing", "Saying Salam", "Helping Parents", "Making Dua", "Giving Charity",
+      "Telling the Truth", "Reading Quran", "Saying Bismillah", "Saying Alhamdulillah",
+      "Fasting", "Praying on Time", "Visiting the Sick", "Forgiving Others", "Keeping Promises",
+      "Being Patient", "Cleaning the Masjid", "Feeding the Poor", "Loving for Others What You Love",
+      "Removing Harm from the Road", "Saying Jazakallah Khair", "Making Istighfar",
+      "Respecting Elders", "Being Kind to Animals", "Thanking Allah", "Reciting Dhikr",
+      "Paying Zakat", "Going to Jumu'ah", "Lowering the Gaze", "Backing a Brother"
+    ]
   },
   kidsNature: {
     icon: "🌍",
     name: "Easy: Creations of Allah",
-    words: ["The Sun", "The Moon", "The Stars", "Mountains", "The Ocean", "Trees", "Rain", "Clouds"]
+    words: [
+      "The Sun", "The Moon", "The Stars", "Mountains", "The Ocean", "Trees", "Rain", "Clouds",
+      "Rivers", "Deserts", "Flowers", "Snow", "Lightning", "Wind", "Fire", "Soil",
+      "Valleys", "Volcanoes", "Rainbows", "Thunder", "Glaciers", "Waterfalls", "Forests",
+      "The Sky", "The Earth", "Earthquakes", "Tsunamis", "Tornadoes", "Hurricanes",
+      "The Galaxy", "Black Holes", "The Atmosphere", "Coral Reefs", "Caves", "Icebergs"
+    ]
   },
   kidsTimes: {
     icon: "⏰",
     name: "Easy: Times & Prayers",
-    words: ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha", "Jumu'ah (Friday)", "Ramadan", "Eid"]
+    words: [
+      "Fajr", "Dhuhr", "Asr", "Maghrib", "Isha", "Jumu'ah (Friday)", "Ramadan", "Eid al-Fitr",
+      "Eid al-Adha", "Tahajjud", "Witr", "Ishraq", "Duha", "Laylatul Qadr", "Night of Miraj",
+      "Day of Arafah", "10th of Muharram (Ashura)", "15th of Sha'ban", "First 10 Days of Dhul-Hijjah",
+      "Monday Fast", "Thursday Fast", "White Days (13-14-15)", "New Islamic Year",
+      "Birth of the Prophet (Rabi' al-Awwal)", "Isra wal Miraj Night"
+    ]
   },
   objects: {
     icon: "📿",
     name: "Easy: Islamic Objects",
     words: [
-      "The Kaaba", "Zamzam Water", "Miswak", "Prayer Mat", "Tasbih (Prayer Beads)", 
-      "The Quran", "Masjid (Mosque)", "Kufi / Hat", "Hijab", "Halal Sweets"
+      "The Kaaba", "Zamzam Well", "Miswak", "Prayer Mat", "Tasbih (Prayer Beads)",
+      "The Quran", "Masjid (Mosque)", "Kufi / Hat", "Hijab", "Halal Sweets",
+      "Adhan Clock", "Minaret", "Qibla Compass", "Islamic Calligraphy", "Wudu Jug",
+      "Eid Lantern (Fanoos)", "Crescent Moon & Star", "Black Stone (Hajar al-Aswad)",
+      "Maqam Ibrahim", "Zamzam Bottle", "Islamic Bookmarks", "Turbah (Prayer Stone)",
+      "Sutra (Prayer Barrier)", "Eid Gift Box", "Ramadan Tent", "Zakat Box",
+      "Masjid Dome", "Ablution Area", "Minbar (Pulpit)", "Misbaha", "Tasbeeh Counter"
     ]
   },
+
+  // ── MEDIUM CATEGORIES ────────────────────────────────────────────────────────
   countriesPlaces: {
     icon: "🗺️",
     name: "Islamic Countries & Places",
     words: [
-      "Makkah", "Madinah", "Jerusalem (Al-Quds)", "Palestine", "Saudi Arabia", 
-      "Turkey", "Egypt", "Morocco", "Yemen", "Syria", "Andalusia", "Pakistan", "Indonesia"
+      "Makkah", "Madinah", "Jerusalem (Al-Quds)", "Palestine", "Saudi Arabia",
+      "Turkey", "Egypt", "Morocco", "Yemen", "Syria", "Andalusia", "Pakistan", "Indonesia",
+      "Jordan", "Libya", "Algeria", "Somalia", "Malaysia", "Bangladesh", "Nigeria",
+      "Senegal", "Iran", "Iraq", "Bosnia", "Azerbaijan", "Kazakhstan", "Uzbekistan",
+      "Chechnya", "Kosovo", "Oman", "UAE", "Qatar", "Kuwait", "Bahrain", "Tunisia",
+      "Mauritania", "Mali", "Niger", "Chad", "Sudan", "Brunei", "Maldives",
+      "Masjid al-Haram", "Masjid an-Nabawi", "Masjid al-Aqsa", "Cave of Hira",
+      "Cave of Thawr", "Mount Uhud", "Badr", "Karbala", "Samarkand", "Baghdad (Old)"
     ]
   },
   prophets: {
     icon: "🐪",
     name: "Prophets of Islam",
     words: [
-      "Prophet Adam", "Prophet Nuh", "Prophet Ibrahim", "Prophet Musa", 
-      "Prophet Isa", "Prophet Muhammad", "Prophet Yusuf", "Prophet Yunus", 
-      "Prophet Sulaiman", "Prophet Ayyub"
+      "Prophet Adam", "Prophet Nuh", "Prophet Ibrahim", "Prophet Musa",
+      "Prophet Isa", "Prophet Muhammad ﷺ", "Prophet Yusuf", "Prophet Yunus",
+      "Prophet Sulaiman", "Prophet Ayyub", "Prophet Idris", "Prophet Hud",
+      "Prophet Salih", "Prophet Lut", "Prophet Shuayb", "Prophet Dawud",
+      "Prophet Zakariyya", "Prophet Yahya", "Prophet Ilyas", "Prophet Al-Yasa",
+      "Prophet Dhul-Kifl", "Prophet Ismail", "Prophet Ishaq", "Prophet Yaqub",
+      "Prophet Haroun (Harun)"
     ]
   },
   pillars: {
     icon: "🕌",
     name: "Pillars of Islam & Iman",
     words: [
-      "Shahadah (Faith)", "Salah (Prayer)", "Zakat (Charity)", "Sawm (Fasting)", "Hajj (Pilgrimage)",
-      "Belief in Allah", "Belief in Angels", "Belief in Holy Books", "Belief in Prophets", "Belief in the Day of Judgement", "Belief in Qadar"
-    ]
-  },
-  makharij: {
-    icon: "📖",
-    name: "Tajweed: Makharij (Hard)",
-    words: [
-      "Halqiyyah (Throat Letters)", "Lahawiyyah (Deep Tongue)", "Shajariyyah (Middle Tongue)", 
-      "Haafiyah (Edge of Tongue)", "Tarafiyyah (Tip of Tongue)", "Nit'iyyah (Palate)", 
-      "Lisawiyyah (Gums)", "Safeeriyah (Whistling)", "Shafawiyyah (Lips)", 
-      "Jawfee (Empty Space)", "Khaysoom (Nasal Cavity)"
-    ]
-  },
-  angels: {
-    icon: "✨",
-    name: "Angels of Allah",
-    words: [
-      "Jibril", "Mikail", "Israfil", "Izrail (Angel of Death)", 
-      "Munkar", "Nakir", "Kiraman Katibin (The Recorders)", "Ridwan", "Malik"
-    ]
-  },
-  months: {
-    icon: "🌙",
-    name: "Islamic Months",
-    words: [
-      "Muharram", "Safar", "Rabi' al-Awwal", "Rabi' ath-Thani", "Jumada al-Ula", 
-      "Jumada al-Akhirah", "Rajab", "Sha'ban", "Ramadan", "Shawwal", "Dhul-Qa'dah", "Dhul-Hijjah"
+      "Shahadah (Declaration of Faith)", "Salah (Prayer)", "Zakat (Charity)",
+      "Sawm (Fasting)", "Hajj (Pilgrimage)",
+      "Belief in Allah", "Belief in Angels", "Belief in Holy Books",
+      "Belief in Prophets", "Belief in the Day of Judgement", "Belief in Qadar (Decree)",
+      "Tawhid (Oneness of Allah)", "Shirk (Its Opposite)", "Taqwa (God-Consciousness)",
+      "Ihsan (Excellence in Worship)", "Tawbah (Repentance)", "Wudu (Ablution)",
+      "Ghusl (Full Purification)", "Tayammum (Dry Ablution)", "Adhan (Call to Prayer)",
+      "Iqamah", "Niyyah (Intention)", "Qibla (Direction of Prayer)"
     ]
   },
   sahabah: {
     icon: "🛡️",
     name: "Famous Sahabah (Companions)",
     words: [
-      "Abu Bakr as-Siddiq", "Umar ibn al-Khattab", "Uthman ibn Affan", "Ali ibn Abi Talib", 
-      "Bilal ibn Rabah", "Khalid ibn al-Walid", "Salman al-Farsi", "Abu Hurairah"
+      "Abu Bakr as-Siddiq", "Umar ibn al-Khattab", "Uthman ibn Affan", "Ali ibn Abi Talib",
+      "Bilal ibn Rabah", "Khalid ibn al-Walid", "Salman al-Farsi", "Abu Hurairah",
+      "Abdullah ibn Masud", "Abdullah ibn Abbas", "Muadh ibn Jabal", "Zayd ibn Harithah",
+      "Talhah ibn Ubaydullah", "Zubayr ibn Awwam", "Abdur-Rahman ibn Awf",
+      "Said ibn Abi Waqqas", "Abu Darda", "Abu Musa al-Ashari", "Ammar ibn Yasir",
+      "Amr ibn al-As", "Usama ibn Zayd", "Anas ibn Malik", "Jabir ibn Abdullah",
+      "Abu Ubayda ibn al-Jarrah", "Sad ibn Muadh", "Khabbab ibn al-Aratt",
+      "Miqdad ibn al-Aswad", "Nuaym ibn Masud", "Hudhayfah ibn al-Yaman"
     ]
   },
   surahs: {
     icon: "📜",
     name: "Famous Surahs",
     words: [
-      "Surah Al-Fatihah", "Surah Al-Baqarah", "Surah Ya-Sin", "Surah Al-Kahf", 
-      "Surah Al-Mulk", "Surah Ar-Rahman", "Surah Al-Ikhlas", "Surah Al-Falaq", "Surah An-Nas"
+      "Surah Al-Fatihah", "Surah Al-Baqarah", "Surah Ya-Sin", "Surah Al-Kahf",
+      "Surah Al-Mulk", "Surah Ar-Rahman", "Surah Al-Ikhlas", "Surah Al-Falaq", "Surah An-Nas",
+      "Surah Al-Imran", "Surah An-Nisa", "Surah Al-Maidah", "Surah Al-Anam",
+      "Surah Al-Anfal", "Surah At-Tawbah", "Surah Yunus", "Surah Hud", "Surah Yusuf",
+      "Surah Ibrahim", "Surah Al-Hijr", "Surah An-Nahl", "Surah Al-Isra",
+      "Surah Al-Muminun", "Surah An-Nur", "Surah Al-Furqan", "Surah Ash-Shuara",
+      "Surah Al-Qasas", "Surah Al-Ankabut", "Surah Luqman", "Surah Al-Ahzab",
+      "Surah Sad", "Surah Az-Zumar", "Surah Ghafir", "Surah Fussilat", "Surah Ash-Shura",
+      "Surah Ad-Dukhan", "Surah Al-Fath", "Surah Al-Hujurat", "Surah Qaf",
+      "Surah Al-Waqiah", "Surah Al-Hashr", "Surah Al-Jumu'ah", "Surah Al-Munafiqun",
+      "Surah At-Tahrim", "Surah Al-Qalam", "Surah Al-Muzzammil", "Surah Al-Muddaththir",
+      "Surah Al-Qiyamah", "Surah Al-Insan", "Surah An-Naba", "Surah An-Naziat",
+      "Surah Abasa", "Surah At-Takwir", "Surah Al-Infitar", "Surah Al-Mutaffifin",
+      "Surah Al-Inshiqaq", "Surah Al-Buruj", "Surah At-Tariq", "Surah Al-Ala",
+      "Surah Al-Ghashiyah", "Surah Al-Fajr", "Surah Al-Balad", "Surah Ash-Shams",
+      "Surah Al-Layl", "Surah Ad-Duha", "Surah Ash-Sharh", "Surah At-Tin",
+      "Surah Al-Alaq", "Surah Al-Qadr", "Surah Al-Bayyinah", "Surah Az-Zalzalah",
+      "Surah Al-Adiyat", "Surah Al-Qariah", "Surah At-Takathur", "Surah Al-Asr",
+      "Surah Al-Humazah", "Surah Al-Fil", "Surah Quraysh", "Surah Al-Maun",
+      "Surah Al-Kawthar", "Surah Al-Kafirun", "Surah An-Nasr", "Surah Al-Masad"
+    ]
+  },
+  angels: {
+    icon: "✨",
+    name: "Angels of Allah",
+    words: [
+      "Jibril (Revelation)", "Mikail (Rain & Provision)", "Israfil (The Trumpet)",
+      "Izrail (Angel of Death)", "Munkar (Grave Questions)", "Nakir (Grave Questions)",
+      "Raqib (Records Good Deeds)", "Atid (Records Bad Deeds)",
+      "Ridwan (Keeper of Jannah)", "Malik (Keeper of Jahannam)",
+      "Harut", "Marut", "Kiraman Katibin (The Noble Recorders)",
+      "Carriers of the Throne (Hamalat al-Arsh)", "The Guardian Angels (Muaqqibat)",
+      "Angel of the Mountains", "Angel of the Sea", "Angels of Mercy",
+      "Angels of Punishment", "The Angels Who Greet in Jannah"
+    ]
+  },
+  months: {
+    icon: "🌙",
+    name: "Islamic Months",
+    words: [
+      "Muharram", "Safar", "Rabi' al-Awwal", "Rabi' ath-Thani",
+      "Jumada al-Ula", "Jumada al-Akhirah", "Rajab", "Sha'ban",
+      "Ramadan", "Shawwal", "Dhul-Qa'dah", "Dhul-Hijjah",
+      "Sacred Months (Al-Ashhur al-Hurum)", "Month of the Prophet's Birth",
+      "Month of the Isra wal Miraj", "Month of the Battle of Badr",
+      "Month of the Conquest of Makkah", "Month of Laylatul Qadr",
+      "The Blessed Month", "Month of Hajj"
+    ]
+  },
+
+  // ── HARD CATEGORIES ──────────────────────────────────────────────────────────
+  makharij: {
+    icon: "📖",
+    name: "Tajweed: Makharij (Hard)",
+    words: [
+      "Halqiyyah (Throat Letters)", "Lahawiyyah (Deep Tongue)", "Shajariyyah (Middle Tongue)",
+      "Haafiyah (Edge of Tongue)", "Tarafiyyah (Tip of Tongue)", "Nit'iyyah (Palate)",
+      "Lisawiyyah (Gums)", "Safeeriyah (Whistling)", "Shafawiyyah (Lips)",
+      "Jawfee (Empty Space)", "Khaysoom (Nasal Cavity)",
+      "Aqsal-Halq (Deepest Throat)", "Wasat al-Halq (Middle Throat)",
+      "Adnal-Halq (Nearest Throat)", "Aqsal-Lisan (Back of Tongue)",
+      "Wasat al-Lisan (Middle of Tongue)", "Haff al-Lisan (Side of Tongue)",
+      "Taraf al-Lisan (Tip of Tongue)", "Al-Jauf (Air Space)",
+      "Al-Khayshoom (Nasal Passage)", "Sifaat (Characteristics of Letters)",
+      "Ghunnah (Nasalization)", "Madd (Elongation)", "Qalqalah (Echo)",
+      "Tafkheem (Heavy Pronunciation)", "Tarqeeq (Light Pronunciation)"
+    ]
+  },
+  tajweedRules: {
+    icon: "🔤",
+    name: "Tajweed Rules (Hard)",
+    words: [
+      "Ikhfa (Concealment)", "Idgham (Merging)", "Iqlab (Substitution)", "Idhaar (Clear Pronunciation)",
+      "Idhaar Halqi", "Idgham Bila Ghunnah", "Idgham Ma'a Ghunnah",
+      "Madd Tabii (Natural Elongation)", "Madd Wajib Muttasil", "Madd Jaiz Munfasil",
+      "Madd Arid Lissukoon", "Madd Leen", "Madd Lazim",
+      "Qalqalah Sughra", "Qalqalah Kubra",
+      "Waqf (Stopping)", "Ibtida (Starting)", "Saktah (Brief Pause)",
+      "Tafkheem wal Tarqeeq", "Lam Shamsiyyah", "Lam Qamariyyah",
+      "Noon Sakinah Rules", "Meem Sakinah Rules", "Lahn (Mistake in Recitation)",
+      "Hafs an Asim", "Warsh an Nafi"
+    ]
+  },
+
+  // ── NEW CATEGORIES ────────────────────────────────────────────────────────────
+  womenInIslam: {
+    icon: "🌸",
+    name: "Great Women in Islam",
+    words: [
+      "Khadijah bint Khuwaylid", "Aisha bint Abi Bakr", "Fatimah az-Zahra",
+      "Maryam (Mary) عليها السلام", "Asiyah (Wife of Pharaoh)", "Umm Salamah",
+      "Hafsa bint Umar", "Umm Habibah", "Zaynab bint Jahsh",
+      "Umm Sulaym", "Nusaybah bint Kaab (Umm Umarah)", "Sumayya bint Khayyat",
+      "Umm Ayman (Barakah)", "Safiyyah bint Huyayy", "Juwayriyah bint al-Harith",
+      "Zaynab bint Ali", "Ruqayyah bint Muhammad", "Umm Kulthum bint Muhammad",
+      "Bilqis (Queen of Sheba)", "Hajar (Hagar)", "Sarah (Wife of Ibrahim)",
+      "Rahma (Wife of Ayyub)", "Umm Musa (Mother of Musa)", "Sister of Musa"
+    ]
+  },
+  islamicScholars: {
+    icon: "🎓",
+    name: "Famous Islamic Scholars",
+    words: [
+      "Imam Abu Hanifah", "Imam Malik", "Imam Ash-Shafi'i", "Imam Ahmad ibn Hanbal",
+      "Imam Al-Bukhari", "Imam Muslim", "Imam At-Tirmidhi", "Imam Abu Dawud",
+      "Imam An-Nasai", "Imam Ibn Majah", "Ibn Taymiyyah", "Ibn al-Qayyim",
+      "Al-Ghazali", "Ibn Kathir", "An-Nawawi", "Ibn Hajar al-Asqalani",
+      "Al-Qurtubi", "At-Tabari", "Ibn Rushd (Averroes)", "Ibn Sina (Avicenna)",
+      "Al-Kindi", "Al-Farabi", "Ibn Khaldun", "Al-Biruni", "Al-Khawarizmi",
+      "Umar ibn Abd al-Aziz", "Hasan al-Basri", "Sufyan ath-Thawri",
+      "Al-Izz ibn Abd al-Salam", "Al-Suyuti", "Ibn Battuta", "Al-Nawawi"
+    ]
+  },
+  mosques: {
+    icon: "🕌",
+    name: "Famous Mosques & Islamic Sites",
+    words: [
+      "Masjid al-Haram (Makkah)", "Masjid an-Nabawi (Madinah)", "Masjid al-Aqsa (Jerusalem)",
+      "Dome of the Rock", "Masjid Quba (First Mosque)", "Masjid al-Qiblatayn",
+      "Sultan Ahmed Mosque (Blue Mosque)", "Hagia Sophia Mosque",
+      "Sheikh Zayed Grand Mosque", "Hassan II Mosque (Morocco)",
+      "Umayyad Mosque (Damascus)", "Al-Azhar Mosque (Cairo)",
+      "Cordoba Mosque (Spain)", "Istiqlal Mosque (Jakarta)",
+      "Faisal Mosque (Islamabad)", "Masjid Nabawi Extension",
+      "Quba Mosque Extension", "Mosque of Ibn Tulun", "Djinguereber Mosque (Mali)",
+      "Crystal Mosque (Malaysia)", "Pele Mosque (Istanbul)"
+    ]
+  },
+  prophetStories: {
+    icon: "📖",
+    name: "Stories of the Prophets",
+    words: [
+      "Adam & the Forbidden Tree", "Nuh's Ark (The Great Flood)",
+      "Ibrahim & the Fire", "Ibrahim & the Idols", "The Sacrifice of Ismail",
+      "Yusuf in the Well", "Yusuf & the Dream", "Yusuf & Zulaikha",
+      "Musa & Pharaoh", "Parting of the Red Sea", "The Ten Plagues of Egypt",
+      "Musa & the Golden Calf", "Dawud & Jalut (Goliath)", "Sulaiman & the Ants",
+      "Sulaiman & the Hoopoe Bird", "Sulaiman & Bilqis (Queen of Sheba)",
+      "Yunus & the Whale", "Ayyub's Long Illness", "Isa & the Table from Heaven",
+      "Isa Healing the Blind", "The Birth of Isa (Jesus)",
+      "Muhammad ﷺ in Cave Hira", "The Night Journey (Isra wal Miraj)",
+      "The Battle of Badr", "The Conquest of Makkah", "The Year of Sorrow",
+      "Zakariyya's Dua for a Child", "Yahya's Birth", "Idris Raised to Heaven",
+      "The People of the Cave (Ashab al-Kahf)"
+    ]
+  },
+  hajjRituals: {
+    icon: "🕋",
+    name: "Hajj & Umrah Rituals",
+    words: [
+      "Ihram (Sacred State)", "Tawaf (Circling the Kaaba)", "Sa'i (Walking between Safa & Marwa)",
+      "Wuquf at Arafat", "Muzdalifah (Overnight Stay)", "Mina (Tent City)",
+      "Stoning of the Devil (Rami)", "Halq (Head Shaving)", "Taqsir (Hair Trimming)",
+      "Qurbani (Sacrifice)", "Talbiyah (Labayk Allahumma Labayk)",
+      "Istilam (Touching the Black Stone)", "Zamzam Water",
+      "Maqam Ibrahim", "Hateem (Semi-Circle near Kaaba)",
+      "Safa", "Marwa", "Jabal Rahmah (Mount of Mercy)", "Muzdalifah Pebbles",
+      "Day of Arafah (9 Dhul-Hijjah)", "Eid al-Adha (10 Dhul-Hijjah)",
+      "Ayyam at-Tashreeq (11-12-13 Dhul-Hijjah)",
+      "Farewell Tawaf (Tawaf al-Wada)", "Umrah (Lesser Pilgrimage)",
+      "Hady (Sacrificial Animal)", "Green Markers in Sa'i",
+      "Gate of Salam (Masjid al-Haram)", "Multazam (Door of Kaaba)"
+    ]
+  },
+  jannaNar: {
+    icon: "🌿",
+    name: "Jannah & Jahannam",
+    words: [
+      "Jannah (Paradise)", "Jahannam (Hellfire)", "Firdaws (Highest Level of Jannah)",
+      "The Sirat (Bridge)", "The Mizaan (Scales of Deeds)",
+      "The Book of Deeds", "Hisab (Reckoning)", "Shafa'ah (Intercession)",
+      "Hawdh al-Kawthar (The Pond)", "The Shade of the Throne",
+      "Rivers of Milk in Jannah", "Rivers of Honey in Jannah",
+      "Rivers of Wine in Jannah", "Al-Kawthar (The River)",
+      "Ghurfa (Rooms in Jannah)", "Lote Tree (Sidrat al-Muntaha)",
+      "Seeing Allah in Jannah", "The Gates of Jannah (8 Gates)",
+      "Bab ar-Rayyan (Gate for Fasting)", "Bab as-Sadaqah (Gate for Charity)",
+      "Zaqqum Tree (Hellfire Tree)", "Scorching Wind of Hellfire",
+      "Levels of Hellfire (7 Levels)", "Angels of Hellfire (Zabaniyan)",
+      "The Day of Resurrection (Yawm al-Qiyamah)", "Trumpet Blast (Sur)",
+      "Rising from Graves", "The Plain of Mahshar (Gathering)",
+      "Punishment of the Grave", "Blessings of the Grave"
+    ]
+  },
+  asmaUlHusna: {
+    icon: "☪️",
+    name: "Names of Allah (Al-Asma al-Husna)",
+    words: [
+      "Allah", "Ar-Rahman (The Most Merciful)", "Ar-Rahim (The Most Compassionate)",
+      "Al-Malik (The King)", "Al-Quddus (The Holy)", "As-Salam (The Source of Peace)",
+      "Al-Mumin (The Giver of Faith)", "Al-Muhaymin (The Guardian)",
+      "Al-Aziz (The Almighty)", "Al-Jabbar (The Compeller)",
+      "Al-Mutakabbir (The Supreme)", "Al-Khaliq (The Creator)",
+      "Al-Bari (The Originator)", "Al-Musawwir (The Fashioner)",
+      "Al-Ghaffar (The Forgiving)", "Al-Qahhar (The Subduer)",
+      "Al-Wahhab (The Bestower)", "Ar-Razzaq (The Provider)",
+      "Al-Fattah (The Opener)", "Al-Alim (The All-Knowing)",
+      "Al-Qabid (The Restrainer)", "Al-Basit (The Expander)",
+      "Al-Hafidh (The Preserver)", "Al-Muqit (The Sustainer)",
+      "Al-Hasib (The Reckoner)", "Al-Jalil (The Majestic)",
+      "Al-Karim (The Generous)", "Ar-Raqib (The Watchful)",
+      "Al-Mujib (The Responder to Prayer)", "Al-Wasi (The All-Encompassing)",
+      "Al-Hakim (The Wise)", "Al-Wadud (The Loving)",
+      "Al-Majid (The Glorious)", "Al-Baith (The Resurrector)",
+      "Al-Baqi (The Everlasting)", "Al-Wali (The Protecting Friend)",
+      "Al-Hamid (The Praiseworthy)", "Al-Muhyi (The Giver of Life)",
+      "Al-Mumit (The Taker of Life)", "Al-Hayy (The Ever-Living)",
+      "Al-Qayyum (The Self-Sustaining)", "Al-Ahad (The One)",
+      "As-Samad (The Eternal)", "Al-Qadir (The Capable)",
+      "As-Sami (The All-Hearing)", "Al-Basir (The All-Seeing)",
+      "Al-Lateef (The Subtle)", "Al-Khabir (The Aware)",
+      "Al-Halim (The Forbearing)", "Al-Adhim (The Magnificent)"
+    ]
+  },
+  islamicEtiquette: {
+    icon: "🤲",
+    name: "Sunnah Acts & Etiquette",
+    words: [
+      "Using Miswak (Tooth Stick)", "Eating with the Right Hand", "Entering Home with Right Foot",
+      "Leaving Mosque with Left Foot", "Saying Bismillah Before Eating",
+      "Saying Alhamdulillah After Eating", "Drinking in Three Sips",
+      "Not Blowing into Food or Drink", "Returning Salam Fully",
+      "Visiting the Sick", "Following a Funeral", "Sneezing & Saying Alhamdulillah",
+      "Replying Yarhamukallah to a Sneeze", "Saying Yarhamukumullah",
+      "Giving Gifts", "Shaking Hands", "Hugging on Eid",
+      "Starting with the Right Side (in Wudu)", "Saying Dua Before Sleeping",
+      "Sleeping on the Right Side", "Saying Dua Upon Waking",
+      "Entering the Toilet with Left Foot", "Exiting Toilet with Right Foot",
+      "Saying Dua Before Entering Toilet", "Covering the Awrah",
+      "Looking Down When Walking", "Not Wasting Food", "Respecting the Quran",
+      "Not Speaking in the Toilet", "Keeping the Masjid Clean",
+      "Clipping Nails on Friday", "Trimming the Moustache",
+      "Keeping the Beard", "Wearing White", "Wearing Perfume (Itar)"
+    ]
+  },
+  islamicHistory: {
+    icon: "⚔️",
+    name: "Islamic History Events",
+    words: [
+      "The First Revelation (Cave Hira)", "The Hijrah to Madinah (622 CE)",
+      "Battle of Badr (624 CE)", "Battle of Uhud (625 CE)",
+      "Battle of the Trench / Khandaq (627 CE)",
+      "Treaty of Hudaybiyyah (628 CE)", "Conquest of Makkah (630 CE)",
+      "Battle of Hunayn (630 CE)", "Farewell Hajj (632 CE)",
+      "Passing of the Prophet ﷺ (632 CE)", "Caliphate of Abu Bakr",
+      "Caliphate of Umar (Conquest of Jerusalem)", "Caliphate of Uthman (Quran Compiled)",
+      "Caliphate of Ali", "Battle of Karbala (680 CE)",
+      "Umayyad Caliphate", "Abbasid Caliphate", "Fall of Baghdad (1258 CE)",
+      "Saladin Recaptures Jerusalem (1187 CE)", "Muslim Spain (Andalusia 711–1492 CE)",
+      "Battle of Tours (732 CE)", "Ottoman Empire Established",
+      "Conquest of Constantinople (1453 CE)", "Battle of Ain Jalut (1260 CE)",
+      "Spread of Islam to Africa", "Islam Reaches China (Tang Dynasty)",
+      "First Masjid in Madinah (Quba)", "The Year of Grief (619 CE)",
+      "The Boycott of Banu Hashim", "Migration to Abyssinia (615 CE)"
+    ]
+  },
+  islamicTerms: {
+    icon: "📚",
+    name: "Islamic Vocabulary (Medium)",
+    words: [
+      "Tawhid (Monotheism)", "Shirk (Associating Partners)", "Kufr (Disbelief)",
+      "Nifaq (Hypocrisy)", "Iman (Faith)", "Islam (Submission)",
+      "Ihsan (Excellence)", "Tawbah (Repentance)", "Istighfar (Seeking Forgiveness)",
+      "Tawakkul (Reliance on Allah)", "Sabr (Patience)", "Shukr (Gratitude)",
+      "Ikhlas (Sincerity)", "Taqwa (God-Consciousness)", "Zuhd (Asceticism)",
+      "Wara (Caution from Haram)", "Khushoo (Humility in Prayer)",
+      "Bid'ah (Innovation in Religion)", "Sunnah (Prophetic Practice)",
+      "Hadith (Prophetic Saying)", "Fiqh (Islamic Jurisprudence)",
+      "Fatwa (Islamic Ruling)", "Ijma (Scholarly Consensus)",
+      "Qiyas (Analogical Reasoning)", "Ijtihad (Independent Reasoning)",
+      "Halal (Permitted)", "Haram (Forbidden)", "Makruh (Disliked)", "Mustahabb (Recommended)",
+      "Wajib (Obligatory)", "Fard (Duty)", "Nafl (Voluntary Act)",
+      "Riba (Usury/Interest)", "Zakat (Obligatory Charity)", "Sadaqah (Voluntary Charity)",
+      "Waqf (Endowment)", "Kaffarah (Expiation)", "Diyah (Blood Money)",
+      "Mahr (Bridal Gift)", "Nikah (Marriage Contract)", "Talaq (Divorce)",
+      "Khul (Wife-Initiated Divorce)", "Ghayb (The Unseen)", "Barzakh (Barrier between Death & Resurrection)"
+    ]
+  },
+  quranFacts: {
+    icon: "✨",
+    name: "Quran Facts (Hard)",
+    words: [
+      "114 Surahs", "6236 Verses (Ayat)", "30 Parts (Juz)", "604 Pages",
+      "Surah Al-Baqarah (Longest Surah)", "Surah Al-Kawthar (Shortest Surah)",
+      "Longest Ayah: Ayat al-Dayn (2:282)", "Shortest Ayah: Surah Al-Fajr",
+      "First Revealed Ayah: Iqra (96:1)", "Last Revealed Ayah: 5:3",
+      "Meccan Surahs (86)", "Medinan Surahs (28)",
+      "Muqattaat (Disconnected Letters)", "7 Ahruf (Dialects)",
+      "10 Qirat (Readings)", "Hafs an Asim Reading",
+      "Warsh an Nafi Reading", "Bismillah appears 114 times",
+      "Surah At-Tawbah (No Bismillah)", "Surah An-Naml has extra Bismillah",
+      "Al-Fatiha (7 Verses)", "Ayat al-Kursi (Verse of the Throne)",
+      "The Last Two Ayahs of Al-Baqarah", "Surah Al-Ikhlas = 1/3 of Quran",
+      "First Hafidh of Quran", "Compilation under Abu Bakr",
+      "Standardization under Uthman", "Arabic Diacritics added by Al-Hajjaj",
+      "The Preserved Tablet (Al-Lawh al-Mahfuz)", "Night of Power (Laylatul Qadr)",
+      "Quran Revealed over 23 Years"
     ]
   }
 };

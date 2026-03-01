@@ -758,7 +758,7 @@ function SettingsModal({ onClose, settings, onToggle, onTimerChange, onMaxPlayer
             </div>
             <div>
               <p className="text-white font-semibold text-sm">Impostor: Deen Edition</p>
-              <p className="text-gray-500 text-xs">Version 1.0.0 · Made with ❤️ for the Ummah</p>
+              <p className="text-gray-500 text-xs">Version 1.0.0 · Made with ❤️ for the Ummah by Shaheer Attari</p>
             </div>
           </div>
 

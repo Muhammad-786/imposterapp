@@ -598,7 +598,7 @@ function HowToPlayModal({ onClose }) {
 // ─────────────────────────────────────────────────────────────────────────────
 // MODAL: Settings
 // ─────────────────────────────────────────────────────────────────────────────
-function SettingsModal({ onClose, settings, onToggle, onTimerChange, onResetCustom }) {
+function SettingsModal({ onClose, settings, onToggle, onTimerChange, onMaxPlayersChange, onResetCustom }) {
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/80" onClick={onClose}>
       <div
@@ -683,6 +683,32 @@ function SettingsModal({ onClose, settings, onToggle, onTimerChange, onResetCust
             </label>
           </div>
 
+          {/* Max Players */}
+          <div className="bg-gray-800/60 border border-gray-700 rounded-2xl p-4">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 bg-blue-500/10 rounded-xl flex items-center justify-center">
+                  <Users size={18} className="text-blue-400" />
+                </div>
+                <div>
+                  <p className="text-white font-semibold text-sm">Max Players</p>
+                  <p className="text-gray-500 text-xs">Maximum players allowed per game</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => onMaxPlayersChange(Math.max(3, (settings.maxPlayers || 25) - 1))}
+                  className="w-8 h-8 rounded-xl bg-gray-700 hover:bg-gray-600 text-white flex items-center justify-center font-bold text-lg transition-colors"
+                >−</button>
+                <span className="w-10 text-center text-white font-bold text-lg">{settings.maxPlayers || 25}</span>
+                <button
+                  onClick={() => onMaxPlayersChange((settings.maxPlayers || 25) + 1)}
+                  className="w-8 h-8 rounded-xl bg-gray-700 hover:bg-gray-600 text-white flex items-center justify-center font-bold text-lg transition-colors"
+                >+</button>
+              </div>
+            </div>
+          </div>
+
           {/* Vibration */}
           <div className="bg-gray-800/60 border border-gray-700 rounded-2xl p-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -752,6 +778,7 @@ export default function App() {
     showStartingPlayer: true,
     impostorsKnowEachOther: true,
     vibration: true,
+    maxPlayers: 25,
   };
   const [settings, setSettings] = useState(() => {
     try { return JSON.parse(localStorage.getItem('gameSettings') || 'null') || defaultSettings; }
@@ -813,7 +840,7 @@ export default function App() {
   };
 
   const addPlayer = () => {
-    if (players.length < 25) {
+    if (players.length < (settings.maxPlayers || 25)) {
       setPlayers([...players, `Player ${players.length + 1}`]);
     }
   };
@@ -1041,7 +1068,7 @@ export default function App() {
                   </div>
                 ))}
                 
-                {players.length < 25 && (
+                {players.length < (settings.maxPlayers || 25) && (
                   <button 
                     onClick={addPlayer}
                     className="bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 border-dashed px-3 py-2 rounded-xl text-sm flex items-center gap-1 transition-colors"
@@ -1348,6 +1375,7 @@ export default function App() {
           settings={settings}
           onToggle={toggleSetting}
           onTimerChange={setTimerSeconds}
+          onMaxPlayersChange={(val) => updateSettings({ ...settings, maxPlayers: val })}
           onResetCustom={() => {
             if (window.confirm('Delete all custom categories?')) {
               saveCustomCategories({});

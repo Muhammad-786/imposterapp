@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Users, Settings, Eye, EyeOff, Play, RotateCcw, HelpCircle, X, Edit2, Plus, Trash2, ChevronDown, ChevronUp, Clock, Vibrate, Moon, RefreshCw, Info } from 'lucide-react';
 
 // --- GAME DATA ---
@@ -442,7 +442,7 @@ const EMOJI_OPTIONS = ["🎯","🌟","🔥","💡","🎮","📝","🏆","🎲","
 // MODAL: Custom Category  (defined OUTSIDE App to prevent keyboard-closing bug)
 // ─────────────────────────────────────────────────────────────────────────────
 function CustomCategoryModal({
-  onClose, editingCustomKey,
+  onClose, editingCustomKey, isBuiltin, onResetBuiltin,
   customName, setCustomName,
   customIcon, setCustomIcon,
   customWords, setCustomWords,
@@ -460,7 +460,7 @@ function CustomCategoryModal({
         onClick={e => e.stopPropagation()}
       >
         <div className="flex items-center justify-between p-5 border-b border-gray-800 shrink-0">
-          <h2 className="text-xl font-black text-white">{editingCustomKey ? 'Edit Category' : 'New Custom Category'}</h2>
+          <h2 className="text-xl font-black text-white">{isBuiltin ? `Edit: ${customName}` : editingCustomKey ? 'Edit Category' : 'New Custom Category'}</h2>
           <button onClick={onClose} className="text-gray-400 hover:text-white p-1"><X size={22} /></button>
         </div>
 
@@ -552,7 +552,13 @@ function CustomCategoryModal({
           )}
         </div>
 
-        <div className="p-5 border-t border-gray-800 shrink-0">
+        <div className="p-5 border-t border-gray-800 shrink-0 space-y-3">
+          {isBuiltin && (
+            <button
+              onClick={onResetBuiltin}
+              className="w-full py-3 bg-transparent border border-red-500/30 hover:border-red-500/60 text-red-400 font-bold rounded-2xl transition-colors text-sm"
+            >↺ Reset to Default</button>
+          )}
           <button
             onClick={saveCustomCategory}
             disabled={!customName.trim() || customWords.length < 3}
@@ -798,8 +804,13 @@ export default function App() {
     try { return JSON.parse(localStorage.getItem('customCategories') || '{}'); }
     catch { return {}; }
   });
+  const [editedCategories, setEditedCategories] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('editedCategories') || '{}'); }
+    catch { return {}; }
+  });
   const [showCustomModal, setShowCustomModal] = useState(false);
   const [editingCustomKey, setEditingCustomKey] = useState(null); // null = new
+  const [isEditingBuiltin, setIsEditingBuiltin] = useState(false);
   const [customName, setCustomName] = useState('');
   const [customIcon, setCustomIcon] = useState('🎯');
   const [customWords, setCustomWords] = useState([]);
@@ -874,7 +885,13 @@ export default function App() {
     localStorage.setItem('customCategories', JSON.stringify(updated));
   };
 
+  const saveEditedCategories = (updated) => {
+    setEditedCategories(updated);
+    localStorage.setItem('editedCategories', JSON.stringify(updated));
+  };
+
   const openNewCustomModal = () => {
+    setIsEditingBuiltin(false);
     setEditingCustomKey(null);
     setCustomName('');
     setCustomIcon('🎯');
@@ -886,7 +903,22 @@ export default function App() {
     setShowCustomModal(true);
   };
 
+  const openEditBuiltinModal = (key) => {
+    const cat = { ...wordCategories[key], ...(editedCategories[key] || {}) };
+    setIsEditingBuiltin(true);
+    setEditingCustomKey(key);
+    setCustomName(cat.name);
+    setCustomIcon(cat.icon);
+    setCustomWords([...cat.words]);
+    setCustomWordInput('');
+    setBulkInput('');
+    setShowBulk(false);
+    setShowEmojiPicker(false);
+    setShowCustomModal(true);
+  };
+
   const openEditCustomModal = (key) => {
+    setIsEditingBuiltin(false);
     const cat = customCategories[key];
     setEditingCustomKey(key);
     setCustomName(cat.name);
@@ -926,10 +958,15 @@ export default function App() {
 
   const saveCustomCategory = () => {
     if (!customName.trim() || customWords.length < 3) return;
-    const key = editingCustomKey || `custom_${Date.now()}`;
-    const updated = { ...customCategories, [key]: { icon: customIcon, name: customName.trim(), words: customWords } };
-    saveCustomCategories(updated);
-    if (!editingCustomKey) setSelectedCategory(key);
+    if (isEditingBuiltin) {
+      saveEditedCategories({ ...editedCategories, [editingCustomKey]: { icon: customIcon, name: customName.trim(), words: customWords } });
+    } else {
+      const key = editingCustomKey || `custom_${Date.now()}`;
+      const updated = { ...customCategories, [key]: { icon: customIcon, name: customName.trim(), words: customWords } };
+      saveCustomCategories(updated);
+      if (!editingCustomKey) setSelectedCategory(key);
+    }
+    setIsEditingBuiltin(false);
     setShowCustomModal(false);
   };
 
@@ -953,7 +990,8 @@ export default function App() {
     setImposters(imposterIndices);
 
     // 2. Pick Secret Word (built-in or custom)
-    const allCats = { ...wordCategories, ...customCategories };
+    const mergedBuiltin = Object.fromEntries(Object.entries(wordCategories).map(([k, v]) => [k, { ...v, ...(editedCategories[k] || {}) }]));
+    const allCats = { ...mergedBuiltin, ...customCategories };
     const wordsList = allCats[selectedCategory]?.words || wordCategories.kidsAnimals.words;
     const randomWord = wordsList[Math.floor(Math.random() * wordsList.length)];
     setSecretWord(randomWord);
@@ -970,8 +1008,8 @@ export default function App() {
     setIsRevealed(false);
   };
 
-  const handleNextPlayer = () => {
-    if (!hasPeeked) return; // Prevent skipping without looking
+  const handleNextPlayer = (skipHasPeekedCheck = false) => {
+    if (!hasPeeked && !skipHasPeekedCheck) return; // Prevent skipping without looking
     
     setIsPressing(false);
     setHasPeeked(false);
@@ -993,6 +1031,7 @@ export default function App() {
   // --- TIMER LOGIC ---
   const timerRef = useRef(null);
   const [timeLeft, setTimeLeft] = useState(null);
+  const handleNextPlayerRef = useRef(null);
 
   const startPeekTimer = () => {
     if (!settings.timerEnabled) return;
@@ -1010,6 +1049,20 @@ export default function App() {
     clearInterval(timerRef.current);
     setTimeLeft(null);
   };
+
+  // Auto-advance when peek timer expires
+  useEffect(() => {
+    if (timeLeft === 0 && settings.timerEnabled) {
+      const t = setTimeout(() => {
+        setIsPressing(false);
+        handleNextPlayerRef.current?.(true);
+      }, 500);
+      return () => clearTimeout(t);
+    }
+  }, [timeLeft]); // eslint-disable-line
+
+  // Keep ref fresh every render so the timer callback always has latest state
+  handleNextPlayerRef.current = handleNextPlayer;
 
   return (
     <div className="min-h-screen bg-[#121212] text-white font-sans selection:bg-emerald-500/30">
@@ -1130,20 +1183,28 @@ export default function App() {
                 ))}
 
                 {/* Built-in categories */}
-                {Object.entries(wordCategories).map(([key, category]) => (
-                  <button
-                    key={key}
-                    onClick={() => setSelectedCategory(key)}
-                    className={`p-3 rounded-xl border text-left transition-all flex items-center gap-3 ${
-                      selectedCategory === key 
-                        ? 'border-emerald-500 bg-emerald-500/10 text-emerald-50' 
-                        : 'border-gray-700 bg-gray-800/50 text-gray-400 hover:bg-gray-700 hover:text-gray-200'
-                    }`}
-                  >
-                    <span className="text-xl">{category.icon}</span>
-                    <span className="font-medium">{category.name}</span>
-                  </button>
-                ))}
+                {Object.entries(wordCategories).map(([key, category]) => {
+                  const effective = { ...category, ...(editedCategories[key] || {}) };
+                  return (
+                    <div key={key} className={`rounded-xl border flex items-center transition-all ${
+                      selectedCategory === key
+                        ? 'border-emerald-500 bg-emerald-500/10'
+                        : 'border-gray-700 bg-gray-800/50 hover:bg-gray-700'
+                    }`}>
+                      <button
+                        onClick={() => setSelectedCategory(key)}
+                        className="flex-1 p-3 text-left flex items-center gap-3"
+                      >
+                        <span className="text-xl">{effective.icon}</span>
+                        <div className="flex-1 min-w-0">
+                          <span className={`font-medium text-sm block truncate ${selectedCategory === key ? 'text-emerald-50' : 'text-gray-300'}`}>{effective.name}</span>
+                          <span className="text-xs text-gray-500">{effective.words.length} words{editedCategories[key] ? ' · Edited' : ''}</span>
+                        </div>
+                      </button>
+                      <button onClick={() => openEditBuiltinModal(key)} className="p-2 pr-3 text-gray-600 hover:text-emerald-400 transition-colors"><Edit2 size={14} /></button>
+                    </div>
+                  );
+                })}
               </div>
             </div>
 
@@ -1193,13 +1254,16 @@ export default function App() {
             <div 
               onPointerDown={(e) => {
                 e.preventDefault();
-                setIsPressing(true);
-                setHasPeeked(true);
-                startPeekTimer();
-                if (settings.vibration && navigator.vibrate) navigator.vibrate(30);
+                if (!hasPeeked) {
+                  setIsPressing(true);
+                  setHasPeeked(true);
+                  startPeekTimer();
+                  handleNextPlayerRef.current = handleNextPlayer;
+                  if (settings.vibration && navigator.vibrate) navigator.vibrate(30);
+                } else if (!settings.timerEnabled) {
+                  setIsPressing(prev => !prev);
+                }
               }}
-              onPointerUp={() => { setIsPressing(false); stopPeekTimer(); }}
-              onPointerLeave={() => { setIsPressing(false); stopPeekTimer(); }}
               onContextMenu={(e) => e.preventDefault()} // Prevents right-click/long-press menu
               style={{ touchAction: 'none', userSelect: 'none', WebkitUserSelect: 'none' }}
               className={`w-full max-w-sm min-h-[300px] border-2 rounded-3xl flex flex-col items-center justify-center p-8 shadow-2xl relative overflow-hidden transition-all duration-150 cursor-pointer ${
@@ -1211,7 +1275,7 @@ export default function App() {
               {!isPressing ? (
                 <div className="flex flex-col items-center pointer-events-none">
                   <EyeOff size={64} className="text-gray-500 mb-4" />
-                  <p className="text-xl font-bold text-gray-300">Press and Hold</p>
+                  <p className="text-xl font-bold text-gray-300">Tap to Reveal</p>
                   <p className="text-gray-500 text-sm mt-2">Make sure nobody else is looking</p>
                 </div>
               ) : (
@@ -1413,8 +1477,17 @@ export default function App() {
 
       {showCustomModal && (
         <CustomCategoryModal
-          onClose={() => setShowCustomModal(false)}
+          onClose={() => { setShowCustomModal(false); setIsEditingBuiltin(false); }}
           editingCustomKey={editingCustomKey}
+          isBuiltin={isEditingBuiltin}
+          onResetBuiltin={() => {
+            if (window.confirm(`Reset "${wordCategories[editingCustomKey]?.name}" to its original words?`)) {
+              const updated = { ...editedCategories };
+              delete updated[editingCustomKey];
+              saveEditedCategories(updated);
+              setShowCustomModal(false);
+            }
+          }}
           customName={customName} setCustomName={setCustomName}
           customIcon={customIcon} setCustomIcon={setCustomIcon}
           customWords={customWords} setCustomWords={setCustomWords}

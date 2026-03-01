@@ -1170,22 +1170,22 @@ export default function App() {
 
                 {/* Custom categories first */}
                 {Object.entries(customCategories).map(([key, category]) => (
-                  <div key={key} className={`rounded-xl border flex items-center gap-3 transition-all ${
+                  <div key={key} className={`rounded-xl border flex items-center transition-all ${
                     selectedCategory === key
                       ? 'border-emerald-500 bg-emerald-500/10'
                       : 'border-purple-500/40 bg-purple-500/5 hover:bg-purple-500/10'
                   }`}>
                     <button
                       onClick={() => setSelectedCategory(key)}
-                      className="flex-1 p-3 text-left flex items-center gap-3"
+                      className="flex-1 min-w-0 p-3 text-left flex items-center gap-3"
                     >
-                      <span className="text-xl">{category.icon}</span>
+                      <span className="text-xl shrink-0">{category.icon}</span>
                       <div className="flex-1 min-w-0">
                         <span className={`font-medium text-sm block truncate ${selectedCategory === key ? 'text-emerald-50' : 'text-gray-300'}`}>{category.name}</span>
                         <span className="text-xs text-purple-400">{category.words.length} words · Custom</span>
                       </div>
                     </button>
-                    <div className="flex gap-1 pr-2">
+                    <div className="shrink-0 flex gap-1 px-2">
                       <button onClick={() => openEditCustomModal(key)} className="p-1.5 text-gray-500 hover:text-emerald-400 transition-colors"><Edit2 size={14} /></button>
                       <button onClick={() => deleteCustomCategory(key)} className="p-1.5 text-gray-500 hover:text-red-400 transition-colors"><Trash2 size={14} /></button>
                     </div>
@@ -1197,16 +1197,16 @@ export default function App() {
                   const category = builtInEdits[key] || wordCategories[key];
                   const isEdited = !!builtInEdits[key];
                   return (
-                    <div key={key} className={`rounded-xl border flex items-center gap-3 transition-all ${
+                    <div key={key} className={`rounded-xl border flex items-center transition-all ${
                       selectedCategory === key
                         ? 'border-emerald-500 bg-emerald-500/10'
                         : 'border-gray-700 bg-gray-800/50 hover:bg-gray-700'
                     }`}>
                       <button
                         onClick={() => setSelectedCategory(key)}
-                        className="flex-1 p-3 text-left flex items-center gap-3"
+                        className="flex-1 min-w-0 p-3 text-left flex items-center gap-3"
                       >
-                        <span className="text-xl">{category.icon}</span>
+                        <span className="text-xl shrink-0">{category.icon}</span>
                         <div className="flex-1 min-w-0">
                           <span className={`font-medium text-sm block truncate ${selectedCategory === key ? 'text-emerald-50' : 'text-gray-300'}`}>
                             {category.name}
@@ -1214,7 +1214,7 @@ export default function App() {
                           <span className="text-xs text-gray-500">{category.words.length} words{isEdited ? ' · Edited' : ''}</span>
                         </div>
                       </button>
-                      <div className="flex gap-1 pr-2">
+                      <div className="shrink-0 flex gap-1 px-2">
                         <button onClick={() => openEditBuiltInModal(key)} className="p-1.5 text-gray-500 hover:text-emerald-400 transition-colors" title="Edit category"><Edit2 size={14} /></button>
                         {isEdited && (
                           <button onClick={() => restoreBuiltInCategory(key)} className="p-1.5 text-gray-500 hover:text-amber-400 transition-colors" title="Restore original"><RefreshCw size={14} /></button>

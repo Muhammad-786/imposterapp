@@ -746,15 +746,16 @@ export default function App() {
   const [showSettings, setShowSettings] = useState(false);
 
   // Settings State
-  const [settings, setSettings] = useState(() => {
-    try { return JSON.parse(localStorage.getItem('gameSettings') || 'null'); }
-    catch { return null; }
-  } || {
+  const defaultSettings = {
     timerEnabled: false,
     timerSeconds: 10,
     showStartingPlayer: true,
     impostorsKnowEachOther: true,
     vibration: true,
+  };
+  const [settings, setSettings] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('gameSettings') || 'null') || defaultSettings; }
+    catch { return defaultSettings; }
   });
 
   const updateSettings = (updated) => {

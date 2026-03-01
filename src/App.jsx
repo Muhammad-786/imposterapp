@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Users, Settings, Eye, EyeOff, Play, RotateCcw, ShieldQuestion, HelpCircle, X, Edit2, Plus } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Users, Settings, Eye, EyeOff, Play, RotateCcw, ShieldQuestion, HelpCircle, X, Edit2, Plus, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
 
 // --- GAME DATA ---
 const wordCategories = {
@@ -435,6 +435,9 @@ const wordCategories = {
   }
 };
 
+// --- EMOJI OPTIONS ---
+const EMOJI_OPTIONS = ["🎯","🌟","🔥","💡","🎮","📝","🏆","🎲","🌈","⚡","🎪","🧠","💎","🚀","🌙","☀️","🎭","🎨","🎵","🌺"];
+
 export default function App() {
   // --- STATE ---
   const [gameState, setGameState] = useState('setup'); // 'setup', 'passing', 'viewing', 'discussion', 'reveal'
@@ -442,8 +445,24 @@ export default function App() {
   // Setup State
   const [players, setPlayers] = useState(['Player 1', 'Player 2', 'Player 3', 'Player 4']);
   const [imposterCount, setImposterCount] = useState(1);
-  const [selectedCategory, setSelectedCategory] = useState('kidsAnimals'); // Default to easy category
+  const [selectedCategory, setSelectedCategory] = useState('kidsAnimals');
   const [showHowToPlay, setShowHowToPlay] = useState(false);
+
+  // Custom Categories State
+  const [customCategories, setCustomCategories] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('customCategories') || '{}'); }
+    catch { return {}; }
+  });
+  const [showCustomModal, setShowCustomModal] = useState(false);
+  const [editingCustomKey, setEditingCustomKey] = useState(null); // null = new
+  const [customName, setCustomName] = useState('');
+  const [customIcon, setCustomIcon] = useState('🎯');
+  const [customWords, setCustomWords] = useState([]);
+  const [customWordInput, setCustomWordInput] = useState('');
+  const [bulkInput, setBulkInput] = useState('');
+  const [showBulk, setShowBulk] = useState(false);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const wordInputRef = useRef(null);
   
   // Player Editing State
   const [editingIndex, setEditingIndex] = useState(null);
@@ -494,6 +513,78 @@ export default function App() {
     }
   };
 
+  // --- CUSTOM CATEGORY LOGIC ---
+  const saveCustomCategories = (updated) => {
+    setCustomCategories(updated);
+    localStorage.setItem('customCategories', JSON.stringify(updated));
+  };
+
+  const openNewCustomModal = () => {
+    setEditingCustomKey(null);
+    setCustomName('');
+    setCustomIcon('🎯');
+    setCustomWords([]);
+    setCustomWordInput('');
+    setBulkInput('');
+    setShowBulk(false);
+    setShowEmojiPicker(false);
+    setShowCustomModal(true);
+  };
+
+  const openEditCustomModal = (key) => {
+    const cat = customCategories[key];
+    setEditingCustomKey(key);
+    setCustomName(cat.name);
+    setCustomIcon(cat.icon);
+    setCustomWords([...cat.words]);
+    setCustomWordInput('');
+    setBulkInput('');
+    setShowBulk(false);
+    setShowEmojiPicker(false);
+    setShowCustomModal(true);
+  };
+
+  const addCustomWord = () => {
+    const w = customWordInput.trim();
+    if (w && !customWords.includes(w)) {
+      setCustomWords([...customWords, w]);
+      setCustomWordInput('');
+      wordInputRef.current?.focus();
+    }
+  };
+
+  const applyBulkInput = () => {
+    const parsed = bulkInput
+      .split(/[\n,;]+/)
+      .map(w => w.trim())
+      .filter(w => w.length > 0);
+    const merged = [...customWords];
+    parsed.forEach(w => { if (!merged.includes(w)) merged.push(w); });
+    setCustomWords(merged);
+    setBulkInput('');
+    setShowBulk(false);
+  };
+
+  const removeCustomWord = (idx) => {
+    setCustomWords(customWords.filter((_, i) => i !== idx));
+  };
+
+  const saveCustomCategory = () => {
+    if (!customName.trim() || customWords.length < 3) return;
+    const key = editingCustomKey || `custom_${Date.now()}`;
+    const updated = { ...customCategories, [key]: { icon: customIcon, name: customName.trim(), words: customWords } };
+    saveCustomCategories(updated);
+    if (!editingCustomKey) setSelectedCategory(key);
+    setShowCustomModal(false);
+  };
+
+  const deleteCustomCategory = (key) => {
+    const updated = { ...customCategories };
+    delete updated[key];
+    saveCustomCategories(updated);
+    if (selectedCategory === key) setSelectedCategory('kidsAnimals');
+  };
+
   // --- GAME LOGIC ---
   const startGame = () => {
     // 1. Pick Imposters (using indices)
@@ -506,8 +597,9 @@ export default function App() {
     }
     setImposters(imposterIndices);
 
-    // 2. Pick Secret Word
-    const wordsList = wordCategories[selectedCategory].words;
+    // 2. Pick Secret Word (built-in or custom)
+    const allCats = { ...wordCategories, ...customCategories };
+    const wordsList = allCats[selectedCategory]?.words || wordCategories.kidsAnimals.words;
     const randomWord = wordsList[Math.floor(Math.random() * wordsList.length)];
     setSecretWord(randomWord);
 
@@ -544,6 +636,126 @@ export default function App() {
   };
 
   // --- COMPONENTS ---
+  const CustomCategoryModal = () => (
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/80" onClick={() => setShowCustomModal(false)}>
+      <div
+        className="bg-[#1a1a1a] w-full max-w-md rounded-t-3xl sm:rounded-3xl border border-gray-700 shadow-2xl max-h-[92vh] flex flex-col"
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between p-5 border-b border-gray-800 shrink-0">
+          <h2 className="text-xl font-black text-white">
+            {editingCustomKey ? 'Edit Category' : 'New Custom Category'}
+          </h2>
+          <button onClick={() => setShowCustomModal(false)} className="text-gray-400 hover:text-white p-1">
+            <X size={22} />
+          </button>
+        </div>
+
+        {/* Scrollable body */}
+        <div className="overflow-y-auto flex-1 p-5 space-y-5" style={{ scrollbarWidth: 'thin', scrollbarColor: '#10b981 transparent' }}>
+
+          {/* Icon + Name */}
+          <div className="flex gap-3">
+            <div className="relative">
+              <button
+                onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                className="w-14 h-14 text-2xl bg-gray-800 border border-gray-700 rounded-xl flex items-center justify-center hover:border-emerald-500 transition-colors"
+              >{customIcon}</button>
+              {showEmojiPicker && (
+                <div className="absolute top-16 left-0 z-10 bg-[#222] border border-gray-700 rounded-2xl p-3 shadow-2xl grid grid-cols-5 gap-2">
+                  {EMOJI_OPTIONS.map(e => (
+                    <button key={e} onClick={() => { setCustomIcon(e); setShowEmojiPicker(false); }}
+                      className="text-xl w-9 h-9 rounded-lg hover:bg-gray-700 flex items-center justify-center">{e}</button>
+                  ))}
+                </div>
+              )}
+            </div>
+            <input
+              value={customName}
+              onChange={e => setCustomName(e.target.value)}
+              placeholder="Category name..."
+              className="flex-1 bg-gray-800 border border-gray-700 focus:border-emerald-500 rounded-xl px-4 text-white placeholder-gray-500 focus:outline-none text-sm font-semibold"
+            />
+          </div>
+
+          {/* Add single word */}
+          <div>
+            <p className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-2">Add Words</p>
+            <div className="flex gap-2">
+              <input
+                ref={wordInputRef}
+                value={customWordInput}
+                onChange={e => setCustomWordInput(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && addCustomWord()}
+                placeholder="Type a word and press Enter..."
+                className="flex-1 bg-gray-800 border border-gray-700 focus:border-emerald-500 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none text-sm"
+              />
+              <button
+                onClick={addCustomWord}
+                className="bg-emerald-600 hover:bg-emerald-500 text-white px-4 rounded-xl font-bold transition-colors"
+              ><Plus size={18} /></button>
+            </div>
+          </div>
+
+          {/* Bulk paste toggle */}
+          <div>
+            <button
+              onClick={() => setShowBulk(!showBulk)}
+              className="flex items-center gap-2 text-emerald-400 text-sm font-semibold hover:text-emerald-300 transition-colors"
+            >
+              {showBulk ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+              Bulk paste words
+            </button>
+            {showBulk && (
+              <div className="mt-3 space-y-2">
+                <textarea
+                  value={bulkInput}
+                  onChange={e => setBulkInput(e.target.value)}
+                  placeholder={`Paste multiple words separated by commas, semicolons, or new lines.\n\nExample:\nApple, Banana\nMango; Grape\nOrange`}
+                  rows={6}
+                  className="w-full bg-gray-800 border border-gray-700 focus:border-emerald-500 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none text-sm resize-none"
+                />
+                <button
+                  onClick={applyBulkInput}
+                  disabled={!bulkInput.trim()}
+                  className="w-full py-3 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-colors text-sm"
+                >Add All Words</button>
+              </div>
+            )}
+          </div>
+
+          {/* Words list */}
+          {customWords.length > 0 && (
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-gray-400 text-xs font-bold uppercase tracking-widest">Words ({customWords.length})</p>
+                {customWords.length < 3 && <p className="text-amber-400 text-xs">Need at least 3</p>}
+              </div>
+              <div className="flex flex-wrap gap-2 max-h-48 overflow-y-auto" style={{ scrollbarWidth: 'thin', scrollbarColor: '#10b981 transparent' }}>
+                {customWords.map((w, i) => (
+                  <div key={i} className="flex items-center gap-1 bg-gray-800 border border-gray-700 rounded-lg px-3 py-1.5 text-sm text-gray-200">
+                    <span className="max-w-[160px] truncate">{w}</span>
+                    <button onClick={() => removeCustomWord(i)} className="text-gray-500 hover:text-red-400 ml-1"><X size={12} /></button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="p-5 border-t border-gray-800 shrink-0">
+          <button
+            onClick={saveCustomCategory}
+            disabled={!customName.trim() || customWords.length < 3}
+            className="w-full py-4 bg-[#ccff00] hover:bg-[#b8e600] disabled:opacity-30 disabled:cursor-not-allowed text-black font-black rounded-2xl transition-colors uppercase tracking-wide"
+          >Save Category</button>
+        </div>
+      </div>
+    </div>
+  );
+
   const HowToPlayModal = () => (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80">
       <div className="bg-[#222] w-full max-w-md rounded-2xl overflow-hidden shadow-2xl relative">
@@ -667,11 +879,45 @@ export default function App() {
 
             {/* Categories Card (Scrollable) */}
             <div className="bg-[#1a1a1a] rounded-2xl border border-gray-800 p-5 shadow-xl">
-              <h3 className="text-gray-400 font-bold tracking-widest text-sm flex items-center gap-2 mb-4">
-                <span className="text-lg">📚</span> CATEGORIES
-              </h3>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-gray-400 font-bold tracking-widest text-sm flex items-center gap-2">
+                  <span className="text-lg">📚</span> CATEGORIES
+                </h3>
+                <button
+                  onClick={openNewCustomModal}
+                  className="flex items-center gap-1.5 text-xs font-bold text-emerald-400 bg-emerald-400/10 hover:bg-emerald-400/20 border border-emerald-500/30 px-3 py-1.5 rounded-lg transition-colors"
+                >
+                  <Plus size={13} /> Custom
+                </button>
+              </div>
               
               <div className="grid grid-cols-1 gap-2 max-h-72 overflow-y-auto pr-1" style={{ scrollbarWidth: 'thin', scrollbarColor: '#10b981 transparent' }}>
+
+                {/* Custom categories first */}
+                {Object.entries(customCategories).map(([key, category]) => (
+                  <div key={key} className={`rounded-xl border flex items-center gap-3 transition-all ${
+                    selectedCategory === key
+                      ? 'border-emerald-500 bg-emerald-500/10'
+                      : 'border-purple-500/40 bg-purple-500/5 hover:bg-purple-500/10'
+                  }`}>
+                    <button
+                      onClick={() => setSelectedCategory(key)}
+                      className="flex-1 p-3 text-left flex items-center gap-3"
+                    >
+                      <span className="text-xl">{category.icon}</span>
+                      <div className="flex-1 min-w-0">
+                        <span className={`font-medium text-sm block truncate ${selectedCategory === key ? 'text-emerald-50' : 'text-gray-300'}`}>{category.name}</span>
+                        <span className="text-xs text-purple-400">{category.words.length} words · Custom</span>
+                      </div>
+                    </button>
+                    <div className="flex gap-1 pr-2">
+                      <button onClick={() => openEditCustomModal(key)} className="p-1.5 text-gray-500 hover:text-emerald-400 transition-colors"><Edit2 size={14} /></button>
+                      <button onClick={() => deleteCustomCategory(key)} className="p-1.5 text-gray-500 hover:text-red-400 transition-colors"><Trash2 size={14} /></button>
+                    </div>
+                  </div>
+                ))}
+
+                {/* Built-in categories */}
                 {Object.entries(wordCategories).map(([key, category]) => (
                   <button
                     key={key}
@@ -898,6 +1144,7 @@ export default function App() {
 
       {/* Modals */}
       {showHowToPlay && <HowToPlayModal />}
+      {showCustomModal && <CustomCategoryModal />}
 
     </div>
   );
